@@ -16,7 +16,7 @@ const pool = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3000, // Puerto predeterminado para MySQL
+  port: process.env.DB_PORT || 3000,
 }).promise();
 
 //Aplicación de middlewares
@@ -37,6 +37,20 @@ app.get('/api/tasks', async (req, res) => {
     }
 });
 
+//Devolución de una tarea específica
+app.get('/api/tasks/:id', async (req, res) => {
+  const{id} = req.params;
+  try{
+    const result = await pool.query('SELECT * FROM tasks WHERE id = $1', [id]);
+    if(result.rows.length == 0){
+      res.status(404).json('Tarea no encontrada');
+    }
+    res.status(200).json(result.rows[0]);
+  }catch(error){
+    res.status(500).json('Error en la selección de tarea');
+  }
+})
+
 //Creación de una nueva tarea 
 app.post('/api/tasks', async (req, res) => {
     const { title, description, status } = req.body;
@@ -45,9 +59,9 @@ app.post('/api/tasks', async (req, res) => {
             'INSERT INTO tasks (title, description, status) VALUES ($1, $2, $3)',
             [title, description, status]
         );
-        res.status(201).json({message: 'Tarea creada exitosamente'});
+        res.status(201).json('Tarea creada exitosamente');
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json('Error en la creación de la tarea');
     }
 });
 
@@ -56,7 +70,7 @@ app.delete('/api/tasks/:id', async (req, res) => {
   const {id} = req.params;
   try{
       await pool.query('DELETE FROM tasks WHERE id = ?', [id]);
-      res.status(204).send();
+      res.status(204).send('Tarea eliminada');
   }catch(err){
       res.status(500).send('Error en la eliminación de la tarea');
   }
