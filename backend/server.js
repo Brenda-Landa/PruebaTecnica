@@ -2,20 +2,22 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const {Pool} = require('pg');
+//const {Pool} = require('pg');
+require('dotenv').config();
+const mysql = require('mysql2');
 require('dotenv').config();
 
-//Creación de una aplicación Express
+//Creación de una plicación Express
 const app = express();
 
 //Configuración de la configuración con la base de datos 
-const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.PORT,
-  });
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT || 3000, // Puerto predeterminado para MySQL
+}).promise();
 
 //Aplicación de middlewares
 app.use(cors());
@@ -24,14 +26,15 @@ app.use(bodyParser.json());
 //Puerto en el que va a correr el servidor 
 const PORT = process.env.PORT || 3000;
 
+
 //Devuelve la lista de todas las tareas
 app.get('/api/tasks', async (req, res) => {
     try {
-      const {rows} = await pool.query('SELECT * FROM tasks');
+      const {rows} = await pool.query('SELECT * FROM tasks;');
       res.json(rows);
     } catch (err) {
       res.status(500).send('Error al obtener tareas');
-    }  
+    }
 });
 
 //Creación de una nueva tarea 
@@ -48,19 +51,17 @@ app.post('/api/tasks', async (req, res) => {
     }
 });
 
-
-//Eliminar una tarea existente 
+//Eliminación de una tarea
 app.delete('/api/tasks/:id', async (req, res) => {
-    const {id} = req.params;
-    try{
-        await pool.query('DELETE FROM tasks WHERE id = $1', [id]);
-        res.status(204).send();
-    }catch(err){
-        res.status(500).send('Error en la eliminación de la tarea');
-    }
+  const {id} = req.params;
+  try{
+      await pool.query('DELETE FROM tasks WHERE id = ?', [id]);
+      res.status(204).send();
+  }catch(err){
+      res.status(500).send('Error en la eliminación de la tarea');
+  }
+
 });
-
-
 
 //Se inicia el puerto y se escucha en el puerto ya establecido 
 app.listen(PORT, () => {
