@@ -31,22 +31,23 @@ app.get('/api/tasks', async (req, res) => {
       res.json(rows);
     } catch (err) {
       res.status(500).send('Error al obtener tareas');
-    }
-  });
+    }  
+});
 
-  //Creación de una nueva tarea 
-  app.post('/api/tasks', async (req, res) => {
+//Creación de una nueva tarea 
+app.post('/api/tasks', async (req, res) => {
     const { title, description, status } = req.body;
     try {
         const result = await pool.query(
-            'INSERT INTO tasks (title, description, status) VALUES ($1, $2, $3) RETURNING *',
+            'INSERT INTO tasks (title, description, status) VALUES ($1, $2, $3)',
             [title, description, status]
         );
-        res.status(201).json(result.rows[0]);
+        res.status(201).json({message: 'Tarea creada exitosamente'});
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
+
 
 //Eliminar una tarea existente 
 app.delete('/api/tasks/:id', async (req, res) => {
@@ -57,7 +58,6 @@ app.delete('/api/tasks/:id', async (req, res) => {
     }catch(err){
         res.status(500).send('Error en la eliminación de la tarea');
     }
-
 });
 
 
