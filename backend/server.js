@@ -28,14 +28,13 @@ const PORT = process.env.PORT || 3000;
 
 //Devuelve la lista de todas las tareas
 app.get('/api/tasks', async (req, res) => {
-    try{
-        const resultado = await pool.query('SELECT id, title, description, status, created_at, updated_at FROM tasks ORDER BY created_at DESC');
-        res.json(resultado.rows);
-    } catch (error) {
-        res.status(500).send('Error');
+    try {
+      const { rows } = await pool.query('SELECT * FROM tasks');
+      res.json(rows);
+    } catch (err) {
+      res.status(500).send('Error al obtener tareas');
     }
-});
-
+  });
 
 //Se inicia el puerto y se escucha en el puerto ya establecido 
 app.listen(PORT, () => {
