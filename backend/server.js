@@ -2,7 +2,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { Pool } = require('pg');
+const {Pool} = require('pg');
 require('dotenv').config();
 
 //Creación de una plicación Express
@@ -29,12 +29,25 @@ const PORT = process.env.PORT || 3000;
 //Devuelve la lista de todas las tareas
 app.get('/api/tasks', async (req, res) => {
     try {
-      const { rows } = await pool.query('SELECT * FROM tasks');
+      const {rows} = await pool.query('SELECT * FROM tasks');
       res.json(rows);
     } catch (err) {
       res.status(500).send('Error al obtener tareas');
     }
   });
+
+//Eliminar una tarea existente 
+app.delete('/api/tasks/:id', async (req, res) => {
+    const {id} = req.params;
+    try{
+        await pool.query('DELETE FROM tasks WHERE id = $1', [id]);
+        res.status(204).send();
+    }catch(err){
+        res.status(500).send('Error en la eliminación de la tarea');
+    }
+
+}
+)
 
 //Se inicia el puerto y se escucha en el puerto ya establecido 
 app.listen(PORT, () => {
