@@ -49,7 +49,7 @@ app.get('/api/tasks/:id', async (req, res) => {
     return res.status(200).json(rows[0]);
   } catch (error) {
     console.error('Error al seleccionar la tarea:', error);
-    return res.status(500).json({ error: 'Error en la selección de tarea' });
+    return res.status(500).json('Error en la selección de tarea');
   }
 });
 
@@ -74,16 +74,16 @@ app.put('/api/tasks/:id', async (req, res) => {
   const{id} = req.params;
   const{status} = req.body; 
   try{
-    const result = await pool.query(
-      "UPDATE tasks SET status = ?, updated_at = NOW() WHERE id = ? RETURNING *",
+    const [result] = await pool.query(
+      'UPDATE tasks SET status = ?, updated_at = NOW() WHERE id = ?',
       [status, id]
     );
-    if(result.rows.length === 0){
-      return res.status(404).json({ error: "Tarea no encontrada" });
+    if(result.affectedRows === 0){
+      return res.status(404).json("Tarea no encontrada");
     }
-    res.json(result.rows[0]);
+    res.json("Tarea actualizada exitosamente");
   }catch(err){
-    res.status(500).json({ error: "Error al actualizar el estado de la tarea" });
+    res.status(500).json("Error al actualizar el estado de la tarea" );
   }
 });
 
