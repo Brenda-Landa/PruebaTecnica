@@ -55,16 +55,18 @@ app.get('/api/tasks/:id', async (req, res) => {
 
 //Creación de una nueva tarea 
 app.post('/api/tasks', async (req, res) => {
-    const{title, description, status} = req.body;
-    try {
-        const result = await pool.query(
-            'INSERT INTO tasks (title, description, status) VALUES ($1, $2, $3)',
-            [title, description, status]
-        );
-        res.status(201).json('Tarea creada exitosamente');
-    }catch(err){
-        res.status(500).json('Error en la creación de la tarea');
-    }
+  console.log('Datos recibidos:', req.body);
+  const {title, descrpcion, status} = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO tasks (title, descrpcion, status) VALUES (?, ?, ?)',
+      [title, descrpcion, status]
+    );
+    res.status(201).json('Tarea creada exitosamente');
+  } catch (err) {
+    console.error('Error al crear la tarea:', err);
+    res.status(500).json('Error en la creación de la tarea');
+  }
 });
 
 //Actualización del status de una tarea dado su id
